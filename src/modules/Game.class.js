@@ -182,10 +182,10 @@ export default class Game {
   addRandomTile() {
     const empty = [];
 
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
-        if (this.gameBoard[r][c] === 0) {
-          empty.push({ r, c });
+    for (let rr = 0; rr < 4; rr++) {
+      for (let cc = 0; cc < 4; cc++) {
+        if (this.gameBoard[rr][cc] === 0) {
+          empty.push({ r: rr, c: cc });
         }
       }
     }
