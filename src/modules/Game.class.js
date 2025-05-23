@@ -11,10 +11,20 @@ export default class Game {
     return a.length === b.length && a.every((v, i) => v === b[i]);
   }
 
+  updateGameStatus() {
+    if (this.gameBoard.some((row) => row.includes(2048))) {
+      this.gameStatus = 'win';
+    } else if (this.isGameOver()) {
+      this.gameStatus = 'lose';
+    }
+  }
+
   moveLeft() {
     let moved = false;
 
     for (let r = 0; r < 4; r++) {
+      const originalRow = [...this.gameBoard[r]];
+
       let row = this.gameBoard[r].filter((val) => val !== 0);
 
       for (let c = 0; c < row.length - 1; c++) {
@@ -31,7 +41,7 @@ export default class Game {
         row.push(0);
       }
 
-      if (!this.arraysEqual(this.gameBoard[r], row)) {
+      if (!this.arraysEqual(originalRow, row)) {
         moved = true;
         this.gameBoard[r] = row;
       }
@@ -41,17 +51,15 @@ export default class Game {
       this.addRandomTile();
     }
 
-    if (this.gameBoard.some((row) => row.includes(2048))) {
-      this.gameStatus = 'win';
-    } else if (this.isGameOver()) {
-      this.gameStatus = 'lose';
-    }
+    this.updateGameStatus();
   }
 
   moveRight() {
     let moved = false;
 
     for (let r = 0; r < 4; r++) {
+      const originalRow = [...this.gameBoard[r]];
+
       let row = this.gameBoard[r].filter((val) => val !== 0);
 
       for (let c = row.length - 1; c > 0; c--) {
@@ -68,7 +76,7 @@ export default class Game {
         row.unshift(0);
       }
 
-      if (!this.arraysEqual(this.gameBoard[r], row)) {
+      if (!this.arraysEqual(originalRow, row)) {
         moved = true;
         this.gameBoard[r] = row;
       }
@@ -78,24 +86,16 @@ export default class Game {
       this.addRandomTile();
     }
 
-    if (this.gameBoard.some((row) => row.includes(2048))) {
-      this.gameStatus = 'win';
-    } else if (this.isGameOver()) {
-      this.gameStatus = 'lose';
-    }
+    this.updateGameStatus();
   }
 
   moveUp() {
     let moved = false;
 
     for (let c = 0; c < 4; c++) {
-      let col = [];
+      const originalCol = this.gameBoard.map((row) => row[c]);
 
-      for (let r = 0; r < 4; r++) {
-        if (this.gameBoard[r][c] !== 0) {
-          col.push(this.gameBoard[r][c]);
-        }
-      }
+      let col = originalCol.filter((val) => val !== 0);
 
       for (let i = 0; i < col.length - 1; i++) {
         if (col[i] === col[i + 1]) {
@@ -111,9 +111,10 @@ export default class Game {
         col.push(0);
       }
 
-      for (let r = 0; r < 4; r++) {
-        if (this.gameBoard[r][c] !== col[r]) {
-          moved = true;
+      if (!this.arraysEqual(originalCol, col)) {
+        moved = true;
+
+        for (let r = 0; r < 4; r++) {
           this.gameBoard[r][c] = col[r];
         }
       }
@@ -123,24 +124,16 @@ export default class Game {
       this.addRandomTile();
     }
 
-    if (this.gameBoard.some((row) => row.includes(2048))) {
-      this.gameStatus = 'win';
-    } else if (this.isGameOver()) {
-      this.gameStatus = 'lose';
-    }
+    this.updateGameStatus();
   }
 
   moveDown() {
     let moved = false;
 
     for (let c = 0; c < 4; c++) {
-      let col = [];
+      const originalCol = this.gameBoard.map((row) => row[c]);
 
-      for (let r = 3; r >= 0; r--) {
-        if (this.gameBoard[r][c] !== 0) {
-          col.push(this.gameBoard[r][c]);
-        }
-      }
+      let col = originalCol.filter((val) => val !== 0).reverse();
 
       for (let i = 0; i < col.length - 1; i++) {
         if (col[i] === col[i + 1]) {
@@ -153,13 +146,16 @@ export default class Game {
       col = col.filter((val) => val !== 0);
 
       while (col.length < 4) {
-        col.unshift(0);
+        col.push(0);
       }
 
-      for (let r = 3, i = 3; r >= 0; r--, i--) {
-        if (this.gameBoard[r][c] !== col[i]) {
-          moved = true;
-          this.gameBoard[r][c] = col[i];
+      col = col.reverse();
+
+      if (!this.arraysEqual(originalCol, col)) {
+        moved = true;
+
+        for (let r = 0; r < 4; r++) {
+          this.gameBoard[r][c] = col[r];
         }
       }
     }
@@ -168,11 +164,7 @@ export default class Game {
       this.addRandomTile();
     }
 
-    if (this.gameBoard.some((row) => row.includes(2048))) {
-      this.gameStatus = 'win';
-    } else if (this.isGameOver()) {
-      this.gameStatus = 'lose';
-    }
+    this.updateGameStatus();
   }
 
   createEmptyBoard() {
