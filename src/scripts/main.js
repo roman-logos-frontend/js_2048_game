@@ -22,7 +22,7 @@ function renderBoard(board) {
     cell.className = 'field-cell';
 
     if (value) {
-      cell.classList.add(`cell-${value}`);
+      cell.classList.add(`field-cell--${value}`);
     }
   });
 }
@@ -40,6 +40,8 @@ function showMessage(gameStatus) {
     messageWin.classList.remove('hidden');
   } else if (gameStatus === 'lose') {
     messageLose.classList.remove('hidden');
+  } else if (gameStatus === 'idle') {
+    messageStart.classList.remove('hidden');
   }
 }
 
@@ -90,7 +92,7 @@ restartBtn.addEventListener('click', () => {
   game.restart();
   renderBoard(game.getState());
   updateScore(game.getScore());
-  showMessage('playing');
+  showMessage('idle');
   restartBtn.classList.add('hidden');
   startBtn.classList.remove('hidden');
 });

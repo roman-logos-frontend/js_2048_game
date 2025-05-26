@@ -19,31 +19,45 @@ export default class Game {
     }
   }
 
+  mergeRow(row) {
+    const result = [];
+    let skip = false;
+
+    for (let i = 0; i < row.length; i++) {
+      if (skip) {
+        skip = false;
+        continue;
+      }
+
+      if (i + 1 < row.length && row[i] === row[i + 1]) {
+        const merged = row[i] * 2;
+
+        this.gameScore += merged;
+        result.push(merged);
+        skip = true;
+      } else {
+        result.push(row[i]);
+      }
+    }
+
+    while (result.length < 4) {
+      result.push(0);
+    }
+
+    return result;
+  }
+
   moveLeft() {
     let moved = false;
 
     for (let r = 0; r < 4; r++) {
       const originalRow = [...this.gameBoard[r]];
+      const nonZero = originalRow.filter((val) => val !== 0);
+      const newRow = this.mergeRow(nonZero);
 
-      let row = this.gameBoard[r].filter((val) => val !== 0);
-
-      for (let c = 0; c < row.length - 1; c++) {
-        if (row[c] === row[c + 1]) {
-          row[c] *= 2;
-          this.gameScore += row[c];
-          row[c + 1] = 0;
-        }
-      }
-
-      row = row.filter((val) => val !== 0);
-
-      while (row.length < 4) {
-        row.push(0);
-      }
-
-      if (!this.arraysEqual(originalRow, row)) {
+      if (!this.arraysEqual(originalRow, newRow)) {
         moved = true;
-        this.gameBoard[r] = row;
+        this.gameBoard[r] = newRow;
       }
     }
 
@@ -59,26 +73,16 @@ export default class Game {
 
     for (let r = 0; r < 4; r++) {
       const originalRow = [...this.gameBoard[r]];
+      const reversed = originalRow
+        .slice()
+        .reverse()
+        .filter((val) => val !== 0);
+      const merged = this.mergeRow(reversed);
+      const newRow = merged.reverse();
 
-      let row = this.gameBoard[r].filter((val) => val !== 0);
-
-      for (let c = row.length - 1; c > 0; c--) {
-        if (row[c] === row[c - 1]) {
-          row[c] *= 2;
-          this.gameScore += row[c];
-          row[c - 1] = 0;
-        }
-      }
-
-      row = row.filter((val) => val !== 0);
-
-      while (row.length < 4) {
-        row.unshift(0);
-      }
-
-      if (!this.arraysEqual(originalRow, row)) {
+      if (!this.arraysEqual(originalRow, newRow)) {
         moved = true;
-        this.gameBoard[r] = row;
+        this.gameBoard[r] = newRow;
       }
     }
 
@@ -94,28 +98,14 @@ export default class Game {
 
     for (let c = 0; c < 4; c++) {
       const originalCol = this.gameBoard.map((row) => row[c]);
+      const nonZero = originalCol.filter((val) => val !== 0);
+      const merged = this.mergeRow(nonZero);
 
-      let col = originalCol.filter((val) => val !== 0);
-
-      for (let i = 0; i < col.length - 1; i++) {
-        if (col[i] === col[i + 1]) {
-          col[i] *= 2;
-          this.gameScore += col[i];
-          col[i + 1] = 0;
-        }
-      }
-
-      col = col.filter((val) => val !== 0);
-
-      while (col.length < 4) {
-        col.push(0);
-      }
-
-      if (!this.arraysEqual(originalCol, col)) {
+      if (!this.arraysEqual(originalCol, merged)) {
         moved = true;
 
         for (let r = 0; r < 4; r++) {
-          this.gameBoard[r][c] = col[r];
+          this.gameBoard[r][c] = merged[r];
         }
       }
     }
@@ -132,30 +122,18 @@ export default class Game {
 
     for (let c = 0; c < 4; c++) {
       const originalCol = this.gameBoard.map((row) => row[c]);
+      const reversed = originalCol
+        .slice()
+        .reverse()
+        .filter((val) => val !== 0);
+      const merged = this.mergeRow(reversed);
+      const newCol = merged.reverse();
 
-      let col = originalCol.filter((val) => val !== 0).reverse();
-
-      for (let i = 0; i < col.length - 1; i++) {
-        if (col[i] === col[i + 1]) {
-          col[i] *= 2;
-          this.gameScore += col[i];
-          col[i + 1] = 0;
-        }
-      }
-
-      col = col.filter((val) => val !== 0);
-
-      while (col.length < 4) {
-        col.push(0);
-      }
-
-      col = col.reverse();
-
-      if (!this.arraysEqual(originalCol, col)) {
+      if (!this.arraysEqual(originalCol, newCol)) {
         moved = true;
 
         for (let r = 0; r < 4; r++) {
-          this.gameBoard[r][c] = col[r];
+          this.gameBoard[r][c] = newCol[r];
         }
       }
     }
@@ -212,8 +190,9 @@ export default class Game {
   }
 
   restart() {
-    this.start();
+    this.gameBoard = this.createEmptyBoard();
     this.gameStatus = 'idle';
+    this.gameScore = 0;
   }
 
   isGameOver() {
